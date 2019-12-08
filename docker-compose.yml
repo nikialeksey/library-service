@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  db_1:
+    image: postgres
+  db_2:
+    image: postgres
+  rest:
+    build: .
+    command: bash ./run.sh
+    environment:
+      DJANGO_SETTINGS_MODULE: "service.settings.docker"
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db_1
+      - db_2
