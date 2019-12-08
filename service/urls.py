@@ -17,10 +17,13 @@ from django.contrib import admin
 from django.urls import path
 from .views import all
 from .views import reader_info
+from .views import reader_id_bounds
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('all/', all),
     path('reader/<int:reader_id>/', reader_info),
+
+    path('readers/id_bounds/', reader_id_bounds),
 ]

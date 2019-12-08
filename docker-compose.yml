@@ -1,19 +1,44 @@
 version: '3'
 
 services:
-  db_1:
-    image: postgres
-  db_2:
-    image: postgres
+  db_leader:
+    restart: always
+    image: sameersbn/postgresql:10-2
+    volumes:
+    - /tmp/docker/postgresql:/var/lib/postgresql
+    environment:
+    - DB_USER=db_user
+    - DB_PASS=db_pass
+    - DB_NAME=db_name
+    - REPLICATION_USER=repl_user
+    - REPLICATION_PASS=repl_pass
+    ports:
+    - "5432"
+
+  db_follower:
+    restart: always
+    image: sameersbn/postgresql:10-2
+    environment:
+    - REPLICATION_USER=repl_user
+    - REPLICATION_PASS=repl_pass
+    - REPLICATION_MODE=slave
+    - REPLICATION_SSLMODE=prefer
+    - REPLICATION_HOST=db_leader
+    - REPLICATION_PORT=5432
+    ports:
+    - "5433"
+    depends_on:
+    - db_leader
+
   rest:
     build: .
     command: bash ./run.sh
     environment:
       DJANGO_SETTINGS_MODULE: "service.settings.docker"
     volumes:
-      - .:/code
+    - .:/code
     ports:
-      - "8000:8000"
+    - "8000:8000"
     depends_on:
-      - db_1
-      - db_2
+    - db_leader
+    - db_follower
